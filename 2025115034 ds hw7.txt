@@ -1,0 +1,207 @@
+HW PROBLEM 7
+Q1. Expression tree and inorder traversal
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    char data;
+    struct Node *left, *right;
+};
+
+struct Node *create(char x)
+{
+    struct Node *n = malloc(sizeof(struct Node));
+    n->data = x;
+    n->left = n->right = NULL;
+    return n;
+}
+
+void inorder(struct Node *t)
+{
+    if (t) {
+        if (t->left) printf("(");
+        inorder(t->left);
+        printf("%c", t->data);
+        inorder(t->right);
+        if (t->right) printf(")");
+    }
+}
+
+int main()
+{
+    struct Node *t = create('+');
+
+    t->left = create('-');
+    t->left->left = create('a');
+    t->left->right = create('b');
+
+    t->right = create('*');
+    t->right->left = create('c');
+    t->right->right = create('d');
+
+    inorder(t);
+    printf("\n");
+
+    return 0;
+}
+
+Q2. Check whether a binary tree is a BST
+#include <stdio.h>
+#include <limits.h>
+
+int a[100], n;
+
+int check(int i, long long lo, long long hi)
+{
+    if (i >= n) return 1;
+    if (a[i] <= lo || a[i] >= hi) return 0;
+
+    return check(2*i+1, lo, a[i]) &&
+           check(2*i+2, a[i], hi);
+}
+
+int main()
+{
+    int i;
+
+    scanf("%d", &n);
+    if (n < 1 || n > 100) return 0;
+
+    for (i = 0; i < n; i++)
+        scanf("%d", &a[i]);
+
+    puts(check(0, LLONG_MIN, LLONG_MAX) ?
+         "BST" : "Not BST");
+
+    return 0;
+}
+
+Q3. Build a max heap
+#include <stdio.h>
+
+int a[100], n;
+
+void heap(int i)
+{
+    int m = i, l = 2*i+1, r = 2*i+2, t;
+
+    if (l < n && a[l] > a[m]) m = l;
+    if (r < n && a[r] > a[m]) m = r;
+
+    if (m != i) {
+        t = a[i];
+        a[i] = a[m];
+        a[m] = t;
+        heap(m);
+    }
+}
+
+int main()
+{
+    int i;
+
+    scanf("%d", &n);
+    if (n < 1 || n > 100) return 0;
+
+    for (i = 0; i < n; i++)
+        scanf("%d", &a[i]);
+
+    for (i = n/2-1; i >= 0; i--)
+        heap(i);
+
+    for (i = 0; i < n; i++)
+        printf("%d ", a[i]);
+
+    printf("\n");
+    return 0;
+}
+
+Q4. Detect a cycle in an undirected graph
+#include <stdio.h>
+
+int g[100][100], vis[100], n;
+
+int dfs(int u, int p)
+{
+    int v;
+    vis[u] = 1;
+
+    for (v = 0; v < n; v++) {
+        if (g[u][v]) {
+            if (!vis[v]) {
+                if (dfs(v, u)) return 1;
+            }
+            else if (v != p)
+                return 1;
+        }
+    }
+
+    return 0;
+}
+
+int main()
+{
+    int e, i, u, v, cycle = 0;
+
+    scanf("%d%d", &n, &e);
+    if (n < 1 || n > 100 || e < 0) return 0;
+
+    for (i = 0; i < e; i++) {
+        scanf("%d%d", &u, &v);
+
+        if (u >= 0 && u < n && v >= 0 && v < n)
+            g[u][v] = g[v][u] = 1;
+    }
+
+    for (i = 0; i < n; i++)
+        if (!vis[i] && dfs(i, -1))
+            cycle = 1;
+
+    puts(cycle ? "Cycle Found" : "No Cycle");
+    return 0;
+}
+
+Q5. Count islands in a grid
+#include <stdio.h>
+
+char a[50][50];
+int r, c;
+
+void dfs(int i, int j)
+{
+    int x, y, dx, dy;
+
+    if (i < 0 || i >= r || j < 0 || j >= c ||
+        a[i][j] != 'L')
+        return;
+
+    a[i][j] = 'W';
+
+    for (dx = -1; dx <= 1; dx++)
+        for (dy = -1; dy <= 1; dy++)
+            if (dx || dy)
+                dfs(i + dx, j + dy);
+}
+
+int main()
+{
+    int i, j, count = 0;
+
+    scanf("%d%d", &r, &c);
+    if (r < 1 || r > 50 || c < 1 || c > 50)
+        return 0;
+
+    for (i = 0; i < r; i++)
+        for (j = 0; j < c; j++)
+            scanf(" %c", &a[i][j]);
+
+    for (i = 0; i < r; i++)
+        for (j = 0; j < c; j++)
+            if (a[i][j] == 'L') {
+                count++;
+                dfs(i, j);
+            }
+
+    printf("%d\n", count);
+    return 0;
+}
